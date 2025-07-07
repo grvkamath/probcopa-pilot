@@ -211,15 +211,15 @@ function displayInstructionExample() {
     
     // Display alternatives
     document.getElementById('alternatives').innerHTML = 
-        `<strong>There are two possible <em>${example['asks-for']}s</em> of this situation:</strong><br>
+        `<strong>There are two possible <mark>${example['asks-for']}s</mark> of this situation:</strong><br>
         (1) ${example.a1}<br>
         (2) ${example.a2}`;
     
     // Display instruction
     document.getElementById('instruction').innerHTML = 
-        `<strong>This is a practice example. Rate the likelihood that the <u>${example['asks-for']}</u> of the situation is (1) or (2).</strong><br>
-        Use the slider to respond with a number between -50 and 50, where -50 indicates that the ${example['asks-for']} is definitely (1), 
-        50 indicates that the ${example['asks-for']} is definitely (2), and 0 indicates that the ${example['asks-for']} is equally likely to be (1) or (2).`;
+        `<strong>This is a practice example. Rate the likelihood that the <mark>${example['asks-for']}</mark> of the situation is (1) or (2).</strong><br>
+        Use the slider to respond with a number between 0 and 50, where 50 indicates that the ${example['asks-for']} is definitely (1) or definitely (2), 
+        and 0 indicates that the ${example['asks-for']} is equally likely to be (1) or (2).`;
     
     // Update datapoint display above slider
     document.getElementById('datapoint-1').innerHTML = 
@@ -314,7 +314,7 @@ function showInstructionFeedback(example, response) {
         feedbackText = `<strong style="color: #f44336;">Incorrect answer.</strong><br>
         Both options are equally plausible in this case.<br>
         You should not choose an extreme position when both options are equally likely.<br>
-        Please move the slider to a more neutral position (between -20 and 20) to continue.`;
+        Please move the slider to a more neutral position (between 0 and 20) to continue.`;
     } else {
         // One option is more plausible
         const correctText = correctOption === 1 ? example.a1 : example.a2;
@@ -417,15 +417,15 @@ function showInstructionFeedback(example, response) {
     
     // Display alternatives
     document.getElementById('alternatives').innerHTML = 
-        `<strong>There are two possible <em>${datapoint['asks-for']}s</em> of this situation:</strong><br>
+        `<strong>There are two possible <mark>${datapoint['asks-for']}s</mark> of this situation:</strong><br>
         (1) ${datapoint.a1}<br>
         (2) ${datapoint.a2}`;
     
     // Display instruction
     document.getElementById('instruction').innerHTML = 
-        `<strong>With just this information about the situation, rate the likelihood that the <u>${datapoint['asks-for']}</u> of the situation is (1) or (2).</strong><br>
-        Use the slider to respond with a number between -50 and 50, where -50 indicates that the ${datapoint['asks-for']} is definitely (1), 
-        50 indicates that the ${datapoint['asks-for']} is definitely (2), and 0 indicates that the ${datapoint['asks-for']} is equally likely to be (1) or (2).`;
+        `<strong>With just this information about the situation, rate the likelihood that the <mark>${datapoint['asks-for']}</mark> of the situation is (1) or (2).</strong><br>
+        Use the slider to respond with a number between 0 and 50, where 50 indicates that the ${datapoint['asks-for']} is definitely (1) or definitely (2), 
+        and 0 indicates that the ${datapoint['asks-for']} is equally likely to be (1) or (2).`;
     
     // Update datapoint display above slider
     document.getElementById('datapoint-1').innerHTML = 
@@ -451,7 +451,9 @@ function showInstructionFeedback(example, response) {
 function updateSliderValue() {
     const slider = document.getElementById('response-slider');
     const valueDisplay = document.getElementById('slider-value');
-    valueDisplay.textContent = slider.value;
+    // Display absolute value for participants, but keep backend logging unchanged
+    const absoluteValue = Math.abs(parseInt(slider.value));
+    valueDisplay.textContent = absoluteValue;
 }
 
 // Handle continue button click
