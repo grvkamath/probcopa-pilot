@@ -9,6 +9,8 @@ let attentionCheckResults = [];
 let isInstructionPhase = true;
 let instructionIndex = 0;
 let isWelcomePhase = true;
+let isConsentPhase = false;
+let consentData = {};
 
 // Instructional examples for practice
 const INSTRUCTIONAL_EXAMPLES = [
@@ -259,16 +261,48 @@ function displayWelcomeMessage() {
     // Display instruction
     document.getElementById('instruction').innerHTML = 
         `<strong>How it works:</strong><br>
-        • First, we'll start with a couple of practice examples to help you understand the task<br>
-        • Then we'll move on to the real experiment<br>
+        • First, you'll need to read and accept our consent form<br>
+        • Then we'll start with a couple of practice examples to help you understand the task<br>
+        • Finally, we'll move on to the real experiment<br>
         • There are no right or wrong answers in the real experiment - we just want your honest opinion`;
     
     // Hide slider section for welcome
     document.querySelector('.slider-container').style.display = 'none';
     
     // Update continue button text
-    document.getElementById('continue-btn').textContent = 'Start Practice Examples';
+    document.getElementById('continue-btn').textContent = 'Read Consent Form';
     document.getElementById('continue-btn').disabled = false;
+}
+
+// Show consent form
+function displayConsentForm() {
+    document.getElementById('experiment-container').style.display = 'none';
+    document.getElementById('consent-container').style.display = 'block';
+    isConsentPhase = true;
+}
+
+// Handle consent form submission
+function handleConsentSubmission() {
+    // Get consent responses
+    const futureResearchConsent = document.querySelector('input[name="future_research_consent"]:checked').value;
+    const githubRepoConsent = document.querySelector('input[name="github_repo_consent"]:checked').value;
+    
+    // Store consent data
+    consentData = {
+        future_research_consent: futureResearchConsent,
+        github_repo_consent: githubRepoConsent,
+        timestamp: new Date().toISOString()
+    };
+    
+    console.log('Consent responses:', consentData);
+    
+    // Hide consent form and show experiment
+    document.getElementById('consent-container').style.display = 'none';
+    document.getElementById('experiment-container').style.display = 'block';
+    
+    // Start instruction phase
+    isConsentPhase = false;
+    startInstructionPhase();
 }
 
 // Show transition message before starting real experiment
@@ -365,6 +399,11 @@ function showInstructionFeedback(example, response) {
                 return;
             }
             
+            if (isConsentPhase) {
+                // Consent form is already displayed, no need to do anything
+                return;
+            }
+            
             if (isInstructionPhase) {
                 displayInstructionExample();
                 return;
@@ -377,6 +416,7 @@ function showInstructionFeedback(example, response) {
                 
                 // Prepare data for Proliferate submission
                 const experimentData = {
+                    "consent_data": consentData,
                     "trials": responses,
                     "attention_checks": attentionCheckResults,
                     "experiment_info": {
@@ -459,7 +499,12 @@ function updateSliderValue() {
 // Handle continue button click
 function continueToNext() {
     if (isWelcomePhase) {
-        startInstructionPhase();
+        displayConsentForm();
+        return;
+    }
+    
+    if (isConsentPhase) {
+        handleConsentSubmission();
         return;
     }
     
@@ -552,6 +597,7 @@ function initExperiment() {
         // Add event listeners
         document.getElementById('response-slider').addEventListener('input', updateSliderValue);
         document.getElementById('continue-btn').addEventListener('click', continueToNext);
+        document.getElementById('consent-btn').addEventListener('click', handleConsentSubmission);
     }
 }
 
