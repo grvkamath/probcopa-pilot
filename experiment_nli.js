@@ -66,7 +66,7 @@ const ATTENTION_CHECK_DATA = [
         "asks-for": "effect",
         "hard_label": 1, // High likelihood
         p: "The man turned on the light switch.",
-        a: "The room became more bright than before."
+        a: "The light turned on."
     },
     {
         id: "attention_5",
@@ -493,8 +493,15 @@ function continueToNext() {
     
     // Handle attention checks
     if (currentDatapoint.isAttentionCheck) {
-        // Check if likelihood is correct
-        let likelihoodCorrect = likelihoodRating === currentDatapoint['hard_label'];
+        // Check if likelihood rating is appropriate based on the hard_label
+        let likelihoodCorrect = false;
+        if (currentDatapoint['hard_label'] === 1) {
+            // High likelihood case - should be rated 70 or higher
+            likelihoodCorrect = likelihoodRating >= 70;
+        } else if (currentDatapoint['hard_label'] === 0) {
+            // Low likelihood case - should be rated 30 or lower
+            likelihoodCorrect = likelihoodRating <= 30;
+        }
         
         responseData.isAttentionCheck = true;
         responseData.attentionCheckId = currentDatapoint.attentionCheckId;
@@ -506,13 +513,13 @@ function continueToNext() {
         attentionCheckResults[currentDatapoint.attentionCheckId - 1] = {
             id: currentDatapoint.attentionCheckId,
             passed: likelihoodCorrect,
-            likelihood: likelihoodRating, // Use likelihoodRating
+            likelihood: likelihoodRating,
             correctOption: currentDatapoint['hard_label'],
             likelihoodCorrect: likelihoodCorrect,
             slide_number: currentIndex + 1
         };
         
-        console.log(`Attention check ${currentDatapoint.attentionCheckId}: ${likelihoodCorrect ? 'PASSED' : 'FAILED'} (likelihood: ${likelihoodRating}, correct: option ${currentDatapoint['hard_label']})`);
+        console.log(`Attention check ${currentDatapoint.attentionCheckId}: ${likelihoodCorrect ? 'PASSED' : 'FAILED'} (likelihood: ${likelihoodRating}, correct range: ${currentDatapoint['hard_label'] === 1 ? '70-100' : '0-30'})`);
     } else {
         responseData.isAttentionCheck = false;
     }
