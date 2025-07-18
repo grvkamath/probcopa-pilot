@@ -281,6 +281,27 @@
         .consent input[type="radio"] {
             margin-right: 5px;
         }
+        
+        .feedback-form {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .feedback-form textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        .feedback-form textarea:focus {
+            outline: none;
+            border-color: #2196f3;
+        }
     </style>
 </head>
 <body>
@@ -407,6 +428,17 @@
                 <p>Great job! You've completed the practice examples. Now the real experiment will begin.</p>
                 <p>You will see similar questions, but this time there are no right or wrong answers - we want to know your honest opinion about which cause or effect is more likely, and how confident you are in that choice.</p>
                 <button class="continue-btn" onclick="startRealExperiment()">Start Experiment</button>
+            </div>
+        </div>
+        
+        <div id="feedback-container" style="display: none;">
+            <div class="feedback-form">
+                <h2>Thank you for participating in the experiment!</h2>
+                <p>You have completed all questions. Your responses have been recorded.</p>
+                <p>If you have any additional thoughts or feedback about the experiment, please feel free to share them below (optional):</p>
+                <textarea id="feedback-text" rows="6" cols="80" placeholder="Enter any additional thoughts or feedback here..."></textarea>
+                <br><br>
+                <button class="continue-btn" id="submit-feedback-btn">Submit and Complete</button>
             </div>
         </div>
         

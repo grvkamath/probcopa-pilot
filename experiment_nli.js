@@ -369,37 +369,11 @@ function showInstructionFeedback(example, likelihood, isLikelihoodAppropriate) {
             }
             
             if (currentIndex >= currentData.length) {
-                // Experiment completed
+                // Experiment completed - show feedback form
                 document.getElementById('experiment-container').style.display = 'none';
-                document.getElementById('completion-container').style.display = 'block';
+                document.getElementById('feedback-container').style.display = 'block';
                 
-                // Prepare data for Proliferate submission
-                const experimentData = {
-                    "consent_data": consentData,
-                    "trials": responses,
-                    "attention_checks": attentionCheckResults,
-                    "experiment_info": {
-                        "list_index": getUrlParameter('list'),
-                        "total_questions": currentData.length,
-                        "attention_checks_passed": attentionCheckResults.filter(r => r && r.passed).length,
-                        "attention_checks_total": ATTENTION_CHECK_DATA.length,
-                        "experiment_duration_minutes": (Date.now() - experimentStartTime) / 60000,
-                        "completion_time": new Date().toISOString()
-                    }
-                };
-                
-                // Submit to Proliferate (will work in sandbox/debug mode locally)
-                if (typeof proliferate !== 'undefined') {
-                    proliferate.submit(experimentData);
-                } else {
-                    console.log('Proliferate not available, logging data to console:', experimentData);
-                }
-                
-                // Download data if requested
-                if (shouldDownloadData()) {
-                    downloadDataAsJson(experimentData, 'trial_responses.json');
-                    console.log('Data downloaded as trial_responses.json');
-                }
+                // Data will be prepared and submitted when feedback is submitted
                 
                 return;
             }
@@ -571,6 +545,44 @@ function startRealExperiment() {
     displayCurrentDatapoint();
 }
 
+// Handle feedback submission
+function handleFeedbackSubmission() {
+    const feedbackText = document.getElementById('feedback-text').value.trim();
+    
+    // Add feedback to the experiment data
+    const experimentData = {
+        "consent_data": consentData,
+        "trials": responses,
+        "attention_checks": attentionCheckResults,
+        "feedback": feedbackText,
+        "experiment_info": {
+            "list_index": getUrlParameter('list'),
+            "total_questions": currentData.length,
+            "attention_checks_passed": attentionCheckResults.filter(r => r && r.passed).length,
+            "attention_checks_total": ATTENTION_CHECK_DATA.length,
+            "experiment_duration_minutes": (Date.now() - experimentStartTime) / 60000,
+            "completion_time": new Date().toISOString()
+        }
+    };
+    
+    // Submit to Proliferate (will work in sandbox/debug mode locally)
+    if (typeof proliferate !== 'undefined') {
+        proliferate.submit(experimentData);
+    } else {
+        console.log('Proliferate not available, logging data to console:', experimentData);
+    }
+    
+    // Download data if requested
+    if (shouldDownloadData()) {
+        downloadDataAsJson(experimentData, 'trial_responses.json');
+        console.log('Data downloaded as trial_responses.json');
+    }
+    
+    // Show completion message
+    document.getElementById('feedback-container').style.display = 'none';
+    document.getElementById('completion-container').style.display = 'block';
+}
+
 // Initialize the experiment
 function initExperiment() {
     console.log('initExperiment called');
@@ -583,6 +595,7 @@ function initExperiment() {
         console.log('Adding event listeners...');
         document.getElementById('likelihood-slider').addEventListener('input', updateLikelihoodValue);
         document.getElementById('continue-btn').addEventListener('click', continueToNext);
+        document.getElementById('submit-feedback-btn').addEventListener('click', handleFeedbackSubmission);
         console.log('Event listeners added');
     }
 }
