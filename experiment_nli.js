@@ -35,6 +35,20 @@ const INSTRUCTIONAL_EXAMPLES = [
         "hard_label": 0, // Low likelihood
         p: "The man went to the store.",
         a: "He wanted to buy a spaceship."
+    },
+    {
+        id: "instruction_4",
+        "asks-for": "cause",
+        "hard_label": 2, // Moderate likelihood (30-70)
+        p: "She spoke English as her first language.",
+        a: "She was from England."
+    },
+    {
+        id: "instruction_5",
+        "asks-for": "effect",
+        "hard_label": 2, // Moderate likelihood (30-70)
+        p: "The man decided to get a pet.",
+        a: "The man got a dog."
     }
 ];
 
@@ -209,9 +223,13 @@ function displayInstructionExample() {
         `<strong>Possible <mark>${example['asks-for']}</mark>:</strong> ${example.a}`;
     
     // Display instruction
-    document.getElementById('instruction').innerHTML = 
-        `<strong>This is a practice example. Rate on a scale of 0 to 100 how likely you think it is that this is the <mark>${example['asks-for']}</mark> of the situation.</strong><br>
+    let instructionText = `<strong>This is a practice example. Rate on a scale of 0 to 100 how likely you think it is that this is the <mark>${example['asks-for']}</mark> of the situation.</strong><br>
         Use the slider below to indicate your likelihood rating.`;
+    
+    // Add important instruction for all examples
+    instructionText += `<br><br><strong>Important:</strong> When giving your rating, be sure to consider other possible causes and effects; some situations will favor more uncertain responses.`;
+    
+    document.getElementById('instruction').innerHTML = instructionText;
     
     // Update choice context to show the complete sentence
     const contextText = example['asks-for'] === 'effect' ? 
@@ -311,11 +329,14 @@ function handleInstructionResponse(likelihood) {
     
     // Check if likelihood is appropriate based on the hard_label
     if (example['hard_label'] === 1) {
-        // High likelihood case - should be rated 60 or higher
-        isLikelihoodAppropriate = likelihood >= 60;
+        // High likelihood case - should be rated 70 or higher
+        isLikelihoodAppropriate = likelihood >= 70;
     } else if (example['hard_label'] === 0) {
-        // Low likelihood case - should be rated 40 or lower
-        isLikelihoodAppropriate = likelihood <= 40;
+        // Low likelihood case - should be rated 30 or lower
+        isLikelihoodAppropriate = likelihood <= 30;
+    } else if (example['hard_label'] === 2) {
+        // Moderate likelihood case - should be rated between 30-70
+        isLikelihoodAppropriate = likelihood >= 30 && likelihood <= 70;
     }
     
     if (isLikelihoodAppropriate) {
@@ -338,11 +359,15 @@ function showInstructionFeedback(example, likelihood, isLikelihoodAppropriate) {
     if (correctLikelihood === 1) {
         // High likelihood case
         feedbackText += `<strong style="color: #f44336;">Incorrect likelihood rating.</strong><br>
-        This is actually a fairly likely ${example['asks-for']} of the situation. Please move the slider to a higher value to continue.<br>`;
+        This is actually a very likely ${example['asks-for']}. Please move the slider to a higher value (70 or above) to continue.<br>`;
     } else if (correctLikelihood === 0) {
         // Low likelihood case
         feedbackText += `<strong style="color: #f44336;">Incorrect likelihood rating.</strong><br>
-        This is actually a fairly unlikely ${example['asks-for']} of the situation. Please move the slider to a lower value to continue.<br>`;
+        This is actually a very unlikely ${example['asks-for']}. Please move the slider to a lower value (30 or below) to continue.<br>`;
+    } else if (correctLikelihood === 2) {
+        // Moderate likelihood case
+        feedbackText += `<strong style="color: #f44336;">Incorrect likelihood rating.</strong><br>
+        This is a moderately likely ${example['asks-for']}. Please move the slider to a value between 30-70 to continue.<br>`;
     }
     
     document.getElementById('instruction').innerHTML = feedbackText;
