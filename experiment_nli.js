@@ -27,7 +27,7 @@ const INSTRUCTIONAL_EXAMPLES = [
         "asks-for": "effect", 
         "hard_label": 1, // High likelihood
         p: "The student studied for 10 hours per day.",
-        a: "The student did well on the exam."
+        a: "The student remembered most of the material."
     },
     {
         id: "instruction_3",
