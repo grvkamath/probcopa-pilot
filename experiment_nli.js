@@ -41,14 +41,14 @@ const INSTRUCTIONAL_EXAMPLES = [
         "asks-for": "cause",
         "hard_label": 2, // Moderate likelihood (30-70)
         p: "She spoke English as her first language.",
-        a: "She was from England."
+        a: "She was from the United States."
     },
     {
         id: "instruction_5",
         "asks-for": "effect",
         "hard_label": 2, // Moderate likelihood (30-70)
-        p: "The man decided to get a pet.",
-        a: "The man got a dog."
+        p: "The person decided to get a pet.",
+        a: "The person got a dog."
     }
 ];
 
@@ -238,8 +238,8 @@ function displayInstructionExample() {
     document.getElementById('choice-context').innerHTML = contextText;
     
     // Update slider labels
-    document.getElementById('unlikely-label').textContent = `Very unlikely to be the ${example['asks-for']}`;
-    document.getElementById('likely-label').textContent = `Very likely to be the ${example['asks-for']}`;
+    document.getElementById('unlikely-label').textContent = `DEFINITELY NOT the ${example['asks-for']}`;
+    document.getElementById('likely-label').textContent = `DEFINITELY the ${example['asks-for']}`;
     
     // Reset likelihood
     likelihoodRating = 50;
@@ -430,8 +430,8 @@ function showInstructionFeedback(example, likelihood, isLikelihoodAppropriate) {
     document.getElementById('choice-context').innerHTML = contextText;
     
     // Update slider labels
-    document.getElementById('unlikely-label').textContent = `Very unlikely to be the ${datapoint['asks-for']}`;
-    document.getElementById('likely-label').textContent = `Very likely to be the ${datapoint['asks-for']}`;
+    document.getElementById('unlikely-label').textContent = `DEFINITELY NOT the ${datapoint['asks-for']}`;
+    document.getElementById('likely-label').textContent = `DEFINITELY the ${datapoint['asks-for']}`;
     
     // Reset likelihood
     likelihoodRating = 50;
