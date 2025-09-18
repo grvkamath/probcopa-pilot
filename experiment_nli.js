@@ -19,8 +19,8 @@ const INSTRUCTIONAL_EXAMPLES = [
         id: "instruction_1",
         "asks-for": "cause",
         "hard_label": 1, // High likelihood
-        p: "The ice cream melted.",
-        a: "It was a very hot day."
+        p: "The sidewalk (footpath) was totally wet.",
+        a: "It had just rained."
     },
     {
         id: "instruction_2",
@@ -39,14 +39,14 @@ const INSTRUCTIONAL_EXAMPLES = [
     {
         id: "instruction_4",
         "asks-for": "cause",
-        "hard_label": 2, // Moderate likelihood (30-70)
+        "hard_label": 2, // Moderate likelihood
         p: "She spoke English as her first language.",
         a: "She was from the United States."
     },
     {
         id: "instruction_5",
         "asks-for": "effect",
-        "hard_label": 2, // Moderate likelihood (30-70)
+        "hard_label": 2, // Moderate likelihood
         p: "The person decided to get a pet.",
         a: "The person got a dog."
     }
@@ -229,6 +229,37 @@ function displayInstructionExample() {
     // Add important instruction for all examples
     instructionText += `<br><br><strong>Important:</strong> When giving your rating, be sure to consider other possible causes and effects; some situations will favor more uncertain responses.`;
     
+    // Add probability reference table
+    instructionText += `<br><br>When choosing your response, you may find this graph helpful for converting your intuition to a value on the slider below:<br><br>
+        <table style="width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px;">
+            <tr style="background-color: #f0f0f0;">
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #ffebee; width: 9%;">Absolutely no chance</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #ffcdd2; width: 9%;">Almost no chance</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #ffab91; width: 9%;">Highly unlikely</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #ffcc80; width: 9%;">Unlikely</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #fff59d; width: 9%;">Somewhat unlikely</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #fffde7; width: 9%;">Totally even chance</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #e8f5e8; width: 9%;">Somewhat likely</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #c8e6c9; width: 9%;">Likely</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #a5d6a7; width: 9%;">Highly likely</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #81c784; width: 9%;">Almost certain</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #4caf50; width: 9%;">Absolutely certain</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">0</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">1-5</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">6-15</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">16-34</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">35-49</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">50</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">51-65</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">66-84</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">85-94</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">95-99</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">100</td>
+            </tr>
+        </table>`;
+    
     document.getElementById('instruction').innerHTML = instructionText;
     
     // Update choice context to show the complete sentence
@@ -243,8 +274,16 @@ function displayInstructionExample() {
     
     // Reset likelihood
     likelihoodRating = 50;
-    document.getElementById('likelihood-slider').value = 50;
-    document.getElementById('likelihood-value').textContent = '50';
+    const slider = document.getElementById('likelihood-slider');
+    const valueDisplay = document.getElementById('likelihood-value');
+    const instructionElement = document.getElementById('slider-instruction');
+    slider.value = 50;
+    slider.classList.remove('slider-interacted');
+    valueDisplay.classList.remove('show-value');
+    valueDisplay.textContent = '';
+    if (instructionElement) {
+        instructionElement.classList.remove('hide-instruction');
+    }
     
     // Disable continue button until ratings are made
     document.getElementById('continue-btn').disabled = true;
@@ -329,14 +368,14 @@ function handleInstructionResponse(likelihood) {
     
     // Check if likelihood is appropriate based on the hard_label
     if (example['hard_label'] === 1) {
-        // High likelihood case - should be rated 70 or higher
-        isLikelihoodAppropriate = likelihood >= 70;
+        // High likelihood case - should be rated 66-99 (Likely to Almost certain range)
+        isLikelihoodAppropriate = likelihood >= 66 && likelihood <= 99;
     } else if (example['hard_label'] === 0) {
-        // Low likelihood case - should be rated 30 or lower
-        isLikelihoodAppropriate = likelihood <= 30;
+        // Low likelihood case - should be rated 15 or lower (Highly unlikely range)
+        isLikelihoodAppropriate = likelihood <= 15;
     } else if (example['hard_label'] === 2) {
-        // Moderate likelihood case - should be rated between 30-70
-        isLikelihoodAppropriate = likelihood >= 30 && likelihood <= 70;
+        // Moderate likelihood case - should be rated between 35-65 (Somewhat unlikely, totally even chance, or somewhat likely)
+        isLikelihoodAppropriate = likelihood >= 35 && likelihood <= 65;
     }
     
     if (isLikelihoodAppropriate) {
@@ -357,18 +396,71 @@ function showInstructionFeedback(example, likelihood, isLikelihoodAppropriate) {
     
     // Provide appropriate feedback based on the correct answer
     if (correctLikelihood === 1) {
-        // High likelihood case
-        feedbackText += `<strong style="color: #f44336;">Incorrect likelihood rating.</strong><br>
-        This is actually a very likely ${example['asks-for']}. Please move the slider to a higher value (70 or above) to continue.<br>`;
+        // High likelihood case - provide specific explanations for examples 1 and 2
+        if (example.id === "instruction_1") {
+            // First example: Wet sidewalk from rain
+            feedbackText += `<strong style="color: #f44336;">Incorrect likelihood rating.</strong><br>
+            This cause is at least likely, even if it is not absolutely certain (for example, the sidewalk could be wet because a water pipe leaked). Please move the slider to a higher value (66-99) to continue.<br>`;
+        } else if (example.id === "instruction_2") {
+            // Second example: Student remembered material
+            feedbackText += `<strong style="color: #f44336;">Incorrect likelihood rating.</strong><br>
+            This effect is at least likely, even if it is not absolutely certain (for example, a student may fail to remember most of the material despite all their effort). Please move the slider to a higher value (66-99) to continue.<br>`;
+        } else {
+            // Generic high likelihood case for other examples
+            feedbackText += `<strong style="color: #f44336;">Incorrect likelihood rating.</strong><br>
+            This is actually a likely ${example['asks-for']}. Please move the slider to a higher value (66-99) to continue.<br>`;
+        }
     } else if (correctLikelihood === 0) {
         // Low likelihood case
         feedbackText += `<strong style="color: #f44336;">Incorrect likelihood rating.</strong><br>
-        This is actually a very unlikely ${example['asks-for']}. Please move the slider to a lower value (30 or below) to continue.<br>`;
+        This is actually a highly unlikely ${example['asks-for']}. Please move the slider to a lower value (15 or below) to continue.<br>`;
     } else if (correctLikelihood === 2) {
-        // Moderate likelihood case
-        feedbackText += `<strong style="color: #f44336;">Incorrect likelihood rating.</strong><br>
-        This is a moderately likely ${example['asks-for']}. Please move the slider to a value between 30-70 to continue.<br>`;
+        // Moderate likelihood case - provide specific explanations for examples 4 and 5
+        if (example.id === "instruction_4") {
+            // Fourth example: English speaker from USA
+            feedbackText += `<strong style="color: #f44336;">Incorrect likelihood rating.</strong><br>
+            This is a moderate likelihood ${example['asks-for']}. The U.S.A. is a large country of English speakers, so this may be the reason; but she could also be from other English-speaking countries like Canada, the U.K. or Australia, or speak English as her first language despite being from elsewhere. Please move the slider to a value between 35-65 to continue.<br>`;
+        } else if (example.id === "instruction_5") {
+            // Fifth example: Person got a dog
+            feedbackText += `<strong style="color: #f44336;">Incorrect likelihood rating.</strong><br>
+            This is a moderate likelihood ${example['asks-for']}. Dogs are very popular as pets, so the person may have gotten a dog; on the other hand, they also could have gotten a cat, or another species of animal as a pet. Please move the slider to a value between 35-65 to continue.<br>`;
+        } else {
+            // Generic moderate likelihood case for other examples
+            feedbackText += `<strong style="color: #f44336;">Incorrect likelihood rating.</strong><br>
+            This is a moderate likelihood ${example['asks-for']}. Please move the slider to a value between 35-65 to continue.<br>`;
+        }
     }
+    
+    // Add the probability reference table back to the feedback
+    feedbackText += `<br><br>When choosing your response, you may find this graph helpful for converting your intuition to a value on the slider below:<br><br>
+        <table style="width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px;">
+            <tr style="background-color: #f0f0f0;">
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #ffebee; width: 9%;">Absolutely no chance</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #ffcdd2; width: 9%;">Almost no chance</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #ffab91; width: 9%;">Highly unlikely</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #ffcc80; width: 9%;">Unlikely</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #fff59d; width: 9%;">Somewhat unlikely</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #fffde7; width: 9%;">Totally even chance</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #e8f5e8; width: 9%;">Somewhat likely</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #c8e6c9; width: 9%;">Likely</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #a5d6a7; width: 9%;">Highly likely</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #81c784; width: 9%;">Almost certain</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #4caf50; width: 9%;">Absolutely certain</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">0</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">1-5</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">6-15</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">16-34</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">35-49</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">50</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">51-65</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">66-84</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">85-94</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">95-99</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">100</td>
+            </tr>
+        </table>`;
     
     document.getElementById('instruction').innerHTML = feedbackText;
     
@@ -435,11 +527,61 @@ function showInstructionFeedback(example, likelihood, isLikelihoodAppropriate) {
     
     // Reset likelihood
     likelihoodRating = 50;
-    document.getElementById('likelihood-slider').value = 50;
-    document.getElementById('likelihood-value').textContent = '50';
+    const slider = document.getElementById('likelihood-slider');
+    const valueDisplay = document.getElementById('likelihood-value');
+    const instructionElement = document.getElementById('slider-instruction');
+    slider.value = 50;
+    slider.classList.remove('slider-interacted');
+    valueDisplay.classList.remove('show-value');
+    valueDisplay.textContent = '';
+    if (instructionElement) {
+        // Hide instruction during main experiment phase
+        instructionElement.classList.add('hide-instruction');
+    }
     
     // Disable continue button until ratings are made
     document.getElementById('continue-btn').disabled = true;
+    
+    // Show probability table below continue button during main experiment phase
+    if (!isInstructionPhase) {
+        const tableContainer = document.getElementById('probability-table-container');
+        const tableDiv = document.getElementById('probability-table');
+        
+        tableDiv.innerHTML = `
+            <table style="width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px;">
+                <tr style="background-color: #f0f0f0;">
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #ffebee; width: 9%;">Absolutely no chance</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #ffcdd2; width: 9%;">Almost no chance</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #ffab91; width: 9%;">Highly unlikely</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #ffcc80; width: 9%;">Unlikely</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #fff59d; width: 9%;">Somewhat unlikely</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #fffde7; width: 9%;">Totally even chance</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #e8f5e8; width: 9%;">Somewhat likely</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #c8e6c9; width: 9%;">Likely</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #a5d6a7; width: 9%;">Highly likely</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #81c784; width: 9%;">Almost certain</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; background-color: #4caf50; width: 9%;">Absolutely certain</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">0</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">1-5</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">6-15</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">16-34</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">35-49</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">50</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">51-65</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">66-84</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">85-94</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">95-99</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center; font-weight: bold; width: 9%;">100</td>
+                </tr>
+            </table>
+        `;
+        tableContainer.style.display = 'block';
+    } else {
+        // Hide the table during instructional phase
+        document.getElementById('probability-table-container').style.display = 'none';
+    }
 }
 
 // Handle likelihood slider value change
@@ -447,6 +589,18 @@ function updateLikelihoodValue() {
     const slider = document.getElementById('likelihood-slider');
     const valueDisplay = document.getElementById('likelihood-value');
     likelihoodRating = parseInt(slider.value);
+    
+    // Show the value and thumb on first interaction
+    if (!slider.classList.contains('slider-interacted')) {
+        slider.classList.add('slider-interacted');
+        valueDisplay.classList.add('show-value');
+        // Hide the instruction text
+        const instructionElement = document.getElementById('slider-instruction');
+        if (instructionElement) {
+            instructionElement.classList.add('hide-instruction');
+        }
+    }
+    
     valueDisplay.textContent = likelihoodRating;
     
     // Enable continue button when slider is moved (only if not in welcome phase)
@@ -560,7 +714,7 @@ function startRealExperiment() {
     document.getElementById('transition-container').style.display = 'none';
     document.getElementById('experiment-container').style.display = 'block';
     
-    // Hide the instruction box for the real experiment
+    // Hide the instruction box for the real experiment (table is now shown below continue button)
     document.getElementById('instruction').style.display = 'none';
     
     // Hide the information and alternatives boxes for the real experiment

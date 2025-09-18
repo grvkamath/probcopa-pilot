@@ -170,6 +170,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            height: 80px;
+            justify-content: space-between;
         }
         
         .likelihood-side-label {
@@ -181,15 +183,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 45px;
+            margin-top: 30px;
+            margin-bottom: 15px;
         }
         
-        .likelihood-value {
-            font-size: 18px;
-            font-weight: bold;
-            color: #ff9800;
-            margin: 10px 0;
-        }
         
         .datapoint-highlight {
             background-color: #fff3e0;
@@ -213,6 +210,7 @@
             background: #ddd;
             outline: none;
             -webkit-appearance: none;
+            margin: 10px 0;
         }
         
         input[type="range"]::-webkit-slider-thumb {
@@ -223,6 +221,9 @@
             border-radius: 50%;
             background: #2196f3;
             cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            margin-top: -6px;
         }
         
         input[type="range"]::-moz-range-thumb {
@@ -232,6 +233,50 @@
             background: #2196f3;
             cursor: pointer;
             border: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        input[type="range"].slider-interacted::-webkit-slider-thumb {
+            opacity: 1;
+        }
+        
+        input[type="range"].slider-interacted::-moz-range-thumb {
+            opacity: 1;
+        }
+        
+        .likelihood-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff9800;
+            margin: 10px 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .likelihood-value.show-value {
+            opacity: 1;
+        }
+        
+        .slider-instruction {
+            font-size: 14px;
+            color: #666;
+            font-style: italic;
+            margin: 0 0 10px 0;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            min-height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slider-instruction.hide-instruction {
+            opacity: 0;
         }
         
         .continue-btn {
@@ -414,8 +459,9 @@
                  <div class="likelihood-slider-container">
                      <div class="likelihood-side-label" id="unlikely-label">Very unlikely</div>
                      <div class="likelihood-slider-wrapper">
+                         <div class="slider-instruction" id="slider-instruction">Click and drag your mouse anywhere along the slider to begin!</div>
                          <input type="range" id="likelihood-slider" min="0" max="100" value="50" step="1">
-                         <div class="likelihood-value" id="likelihood-value">50</div>
+                         <div class="likelihood-value" id="likelihood-value"></div>
                      </div>
                      <div class="likelihood-side-label" id="likely-label">Very likely</div>
                  </div>
@@ -423,6 +469,13 @@
             
             <div style="text-align: center;">
                 <button class="continue-btn" id="continue-btn">Continue</button>
+            </div>
+            
+            <div id="probability-table-container" style="display: none;">
+                <p style="text-align: center; margin: 20px 0 10px 0; font-size: 14px; color: #666;">
+                    When choosing your response, you may find this graph helpful for converting your intuition to a value on the slider:
+                </p>
+                <div id="probability-table"></div>
             </div>
         </div>
         
