@@ -6,7 +6,7 @@ import pandas as pd
 
 def main():
     if len(sys.argv) != 2:
-        print("Usage: python generate_stimuli_js_v2.py <sublist_size>")
+        print("Usage: python generate_split_stimuli_js.py <sublist_size>")
         sys.exit(1)
     
     try:

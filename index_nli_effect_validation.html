@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probabilistic Annotation Experiment</title>
+    
+    <!-- jQuery (required by Proliferate) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Proliferate for data logging -->
+    <script src="https://proliferate.alps.science/static/js/proliferate.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            background-color: #f9f9f9;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 1000px;
+        }
+        
+        .progress {
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .question-container {
+            margin-bottom: 30px;
+        }
+        
+        .information {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .alternatives {
+            background-color: #fff3e0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .instruction {
+            background-color: #f3e5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #9c27b0;
+        }
+        
+        .slider-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .slider-side-labels {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .slider-side-label {
+            max-width: 120px;
+            text-align: center;
+            line-height: 1.3;
+            display: flex;
+            align-items: center;
+            min-height: 40px;
+        }
+        
+        .slider-with-labels {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 10px 0;
+        }
+        
+        .slider-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .choice-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .choice-context {
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 500;
+            padding: 15px;
+            background-color: #e8f5e8;
+            border-radius: 5px;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .choice-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .choice-btn {
+            background-color: #f0f0f0;
+            color: #333;
+            padding: 15px 25px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 200px;
+            text-align: left;
+        }
+        
+        .choice-btn:hover {
+            background-color: #e0e0e0;
+            border-color: #2196f3;
+        }
+        
+        .choice-btn.selected {
+            background-color: #2196f3;
+            color: white;
+            border-color: #2196f3;
+        }
+        
+        .likelihood-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .likelihood-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 20px 0;
+            width: 100%;
+        }
+        
+        .likelihood-slider-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 80px;
+            justify-content: space-between;
+        }
+        
+        .likelihood-side-label {
+            min-width: 120px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        
+        .datapoint-highlight {
+            background-color: #fff3e0;
+            padding: 8px 12px;
+            border-radius: 5px;
+            border-left: 3px solid #ff9800;
+            margin: 5px 0;
+        }
+        
+        .slider-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2196f3;
+            margin: 10px 0;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+            margin: 10px 0;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2196f3;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            margin-top: -6px;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2196f3;
+            cursor: pointer;
+            border: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        input[type="range"].slider-interacted::-webkit-slider-thumb {
+            opacity: 1;
+        }
+        
+        input[type="range"].slider-interacted::-moz-range-thumb {
+            opacity: 1;
+        }
+        
+        .likelihood-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff9800;
+            margin: 10px 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .likelihood-value.show-value {
+            opacity: 1;
+        }
+        
+        .slider-instruction {
+            font-size: 14px;
+            color: #666;
+            font-style: italic;
+            margin: 0 0 10px 0;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            min-height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slider-instruction.hide-instruction {
+            opacity: 0;
+        }
+        
+        .continue-btn {
+            background-color: #4caf50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .continue-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .continue-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .completion-message {
+            text-align: center;
+            font-size: 18px;
+            color: #4caf50;
+            font-weight: bold;
+        }
+        
+        .error-message {
+            color: #f44336;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .consent {
+            background-color: #f9f9f9;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .consent .center {
+            text-align: center;
+        }
+        
+        .consent .left {
+            text-align: left;
+        }
+        
+        .consent input[type="radio"] {
+            margin-right: 5px;
+        }
+        
+        .feedback-form {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .feedback-form textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        .feedback-form textarea:focus {
+            outline: none;
+            border-color: #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Probabilistic Annotation Experiment</h1>
+        
+        <div id="error-container" style="display: none;">
+            <div class="error-message" id="error-message"></div>
+        </div>
+        
+        <div id="consent-container" style="display: none;">
+            <div class="consent" id="consent-form">
+                <p class="center"> <strong>CONSENT FORM</strong></p>
+                <p class="center"> <strong>STUDY TITLE: SEMANTIC STRUCTURE IN LARGE LANGUAGE MODELS</strong></p>
+                <p class="left" style="font-size:16px; color: darkslateblue;">
+                    You are invited to participate in a research study looking at specific types of English sentences.<strong>
+                      Please read this form carefully and ask any questions you may have before agreeing to take part in the study. 
+                    </strong> 
+                    <br>
+                    <br>
+                    <strong>Investigators: </strong> Gaurav Kamath (PhD student with the Department of Linguistics at McGill University), Dr. Siva Reddy (Assistant Professor of Linguistics and Computer Science at McGill University), Dr. Sebastian Schuster (Lecturer of Computational Linguistics at University College London) and Dr. Brendan Gillon (Professor of Linguistics at McGill University).
+                    <br>
+                    <br>
+                    <strong>What this study is about: </strong>The purpose of this study is to investigate whether large language models (LLMs) process language like humans do. 
+                    <br>
+                    <br>
+                    <strong>What we will ask you to do: </strong>In this study you will be provided with sentences and phrases in English, and asked to do one of three tasks:
+                    <br> (i) read sentences and rate how natural-sounding each of them is; 
+                    <br> (ii) read a sentence one word at a time, pressing a button to see each subsequent word; or 
+                    <br> (iii) read a short sentence or passage and answer questions about it. 
+                    <br><strong>Note that in order to finish the experiment, you will have to complete every question in it, and will not be able to skip any questions. We have carefully designed each question to not contain any sensitive or personal content. </strong>
+                    <br>
+                    <br>
+                    <strong>Risks and benefits: </strong>This experiment involves no known risks or discomfort to you beyond the risks of everyday life, nor is it expected to be of any direct benefit to you.
+                    <br>
+                    <br>
+                    <strong>Compensation: </strong>You will be compensated according to the amount specified on the Prolific page you clicked on to participate in this study. At a minimum, this corresponds to US$15.00/hr, pro-rated to the median amount of time taken to complete the task. You may choose to withdraw from the experiment at any time, but will not receive compensation if you do so before finishing the experiment.
+                    <br>
+                    <br>
+                    <strong>Personal data collected: </strong>This study does not collect any personal information, but it does record your Prolific ID. This is necessary for us to be able to delete your data, should you request it. Prolific IDs are never shared publicly, and will be deleted within 1 year. Additionally, since you have been recruited through Prolific using specific filters on the platform, we are aware that you are a native English speaker from the United Kingdom, United States, or Canada. Your exact country of origin, however, is not recorded.
+                    <br>
+                    <br>
+                    <strong>Use of your data: </strong>The anonymous data collected in this study will initially be stored on a secure server and on a cloud-storage service (Microsoft OneDrive), and, if you consent to it, will subsequently be stored in a public GitHub repository. Once on the public GitHub repository, your responses to this study are indefinitely retained.
+                    Your Prolific ID, however, will not be directly linked to your data and will be stored separately (we only store the session ID). Prolific IDs are never uploaded to the public GitHub repository, and will be deleted from our files within 1 year at the latest.
+                    <br>
+                    <br>
+                    The data we collect will be used for research into the similarities between human and LLM language processing, and these research findings will be shared in the form of research articles, presentations, and online interactive sites.
+                    <br>
+                    <br>
+                    <strong>Taking part is voluntary: </strong>Your participation is completely voluntary. <strong>You may withdraw consent and discontinue participation in the study at any time (although if you do this you will not be compensated). This includes the right to withdraw your data.</strong>
+                    However, data cannot be withdrawn after (i) the data has been added to a public GitHub repository, or (ii) the information linking your Prolific ID to your data has been deleted. 
+                    As stated above, once on the public GitHub repository, your responses to this study are indefinitely retained; but Prolific IDs, which are deleted within 1 year, are never uploaded to the public GitHub repository. 
+                    <br>
+                    <br>
+                    <input type="radio" name="future_research_consent" value="Yes" checked> Yes <input type="radio" name="future_research_consent" value="No"> No | You consent to having your anonymous data used for future related research.
+                    <br>
+                    <input type="radio" name="github_repo_consent" value="Yes" checked> Yes <input type="radio" name="github_repo_consent" value="No"> No | You consent to having your de-identified data uploaded to public GitHub repositories, so long as it is not used for commercial purposes.
+                    <br>
+                    <br>
+                    <u>While the two options above are not mandatory, we would greatly appreciate your consent to use your anonymous data in this way. Without your consent, we will not be able to use your data in future research, and other researchers will not be able to verify our results, nor build on our research. By consenting, you are helping further open science and research in the field of linguistics and AI.</u> 
+                    <br>
+                    <br>
+                    <strong>If you have any questions: </strong>You can contact Gaurav Kamath (email: gaurav.kamath@mail.mcgill.ca), graduate student under Dr. Siva Reddy, with any questions about this study. When communicating by email, 
+                    please be aware that information provided in emails is not absolutely safe and may be intercepted. This experiment is being run under the McGill Research Ethics Board protocol #25-02-069. 
+                    <br>
+                    <br>
+                    If you have any ethical concerns or complaints about your participation in this study, and want to speak with someone not on the research team, please contact the Research Ethics Board Office (https://www.mcgill.ca/research/research/human/contact-us), daniel.tesolin@mcgill.ca  or 514-398-5410, citing REB file number 25-02-069. 
+                    <br>
+                    <br>
+                    <strong>McGill Privacy Notice: </strong><br> For more details on how personal information is handled at McGill, please see the McGill University Privacy Notice https://www.mcgill.ca/annex-mcgill-privacy-notice#research.
+                    <br>
+                    <br>
+                    <strong>Data on OneDrive may be stored outside of Quebec: </strong><br> As stated in the "Use of your data" section above, your data will be stored on a secure server and on a cloud-storage service (Microsoft OneDrive). Because OneDrive is part of the Microsoft 365 ecosystem, your data may be stored and processed outside of the province of Quebec. This does not mean that your data will necessarily leave the province, but it does mean that this is a possibility based on Microsoft's infrastructure. 
+                    <br>
+                    <br>
+                    <strong>GDPR Declaration (for European Participants): </strong><br> Note that for participants based in the EU, the data collected in this study falls under the purview of the EU's General Data Protection Regulation (GDPR). As such, we are aware of and comply to the standards demanded by EU GDPR law, including your data protection rights. <strong>Please note that your data will be transferred outside the EU, as it will be stored in Canada. You also retain the right to lodge a complaint with the respective Data Protection Authority of your jurisdiction.</strong> (See this link for more: https://commission.europa.eu/law/law-topic/data-protection/data-protection-explained_en.)
+                    <br>
+                    <br>
+                    <strong>STATEMENT OF CONSENT: </strong><i>Please read this document before continuing on to the survey. Submitting your study responses indicates that you consent to participate in this study. Please save or print a copy of this document to keep for your own reference.</i>
+                </p>
+
+                <div class="center">
+                    <button class="continue-btn" id="consent-btn">
+                        I agree and consent to the terms of this study detailed above, and would like to start the experiment.
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="experiment-container" style="display: none;">
+            <div class="progress" id="progress"></div>
+            
+            <div class="question-container">
+                <div class="information" id="information"></div>
+                <div class="alternatives" id="alternatives"></div>
+                <div class="instruction" id="instruction"></div>
+            </div>
+            
+            <div class="choice-container">
+                <div class="choice-context" id="choice-context"></div>
+            </div>
+
+                         <div class="likelihood-container">
+                 <div class="likelihood-slider-container">
+                     <div class="likelihood-side-label" id="unlikely-label">Very unlikely</div>
+                     <div class="likelihood-slider-wrapper">
+                         <div class="slider-instruction" id="slider-instruction">Click and drag your mouse anywhere along the slider to begin!</div>
+                         <input type="range" id="likelihood-slider" min="0" max="100" value="50" step="1">
+                         <div class="likelihood-value" id="likelihood-value"></div>
+                     </div>
+                     <div class="likelihood-side-label" id="likely-label">Very likely</div>
+                 </div>
+             </div>
+            
+            <div style="text-align: center;">
+                <button class="continue-btn" id="continue-btn">Continue</button>
+            </div>
+            
+            <div id="probability-table-container" style="display: none;">
+                <p style="text-align: center; margin: 20px 0 10px 0; font-size: 14px; color: #666;">
+                    When choosing your response, you may find this graph helpful for converting your intuition to a value on the slider:
+                </p>
+                <div id="probability-table"></div>
+            </div>
+        </div>
+        
+        <div id="transition-container" style="display: none;">
+            <div class="completion-message">
+                <h2>Practice Complete!</h2>
+                <p>Great job! You've completed the practice examples. Now the real experiment will begin.</p>
+                <p>You will see similar questions, but this time there are no right or wrong answers - we want to know your honest opinion about how likely you think different effects are in a given situation.</p>
+                <button class="continue-btn" onclick="startRealExperiment()">Start Experiment</button>
+            </div>
+        </div>
+        
+        <div id="feedback-container" style="display: none;">
+            <div class="feedback-form">
+                <h2>Thank you for participating in the experiment!</h2>
+                <p>You have completed all questions. Your responses have been recorded.</p>
+                <p>If you have any additional thoughts or feedback about the experiment, please feel free to share them below (optional):</p>
+                <textarea id="feedback-text" rows="6" cols="80" placeholder="Enter any additional thoughts or feedback here..."></textarea>
+                <br><br>
+                <button class="continue-btn" id="submit-feedback-btn">Submit and Complete</button>
+            </div>
+        </div>
+        
+        <div id="completion-container" style="display: none;">
+            <div class="completion-message">
+                <h2>Thank you for participating in the experiment!</h2>
+                <p>You have completed all questions. Your responses have been recorded.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="experiment_nli_effect_only.js"></script>
+    <script src="validation_effect_datapoints.js"></script>
+</body>
+</html> 
