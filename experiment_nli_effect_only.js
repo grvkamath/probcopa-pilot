@@ -76,8 +76,8 @@ const ATTENTION_CHECK_DATA = [
         id: "attention_3",
         "asks-for": "effect", 
         "hard_label": 0, // Low likelihood
-        premise: "She was cooking dinner.",
-        hypothesis: "A massive fire broke out in the kitchen."
+        premise: "She was cooking a normal dinner for her family.",
+        hypothesis: "The whole neighborhood burned down."
     },
     {
         id: "attention_4",
