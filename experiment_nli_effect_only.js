@@ -447,11 +447,11 @@ function showPositiveInstructionFeedback(example, likelihood) {
     // Provide specific positive feedback based on the example
     if (example.id === "instruction_1") {
         feedbackText = `<strong style="color: #2e7d32;">Correct!</strong><br><br>
-        This is highly plausible, even if it is not absolutely certain. While it's technically possible the sidewalk dried completely overnight, it's much more probable that it would still be at least somewhat wet in the early morning after heavy rain the previous night.<br><br>
+        This effect at the very least likely, even if it is not absolutely certain. While it's technically possible the sidewalk dried completely overnight, it's much more probable that it would still be at least somewhat wet in the early morning after heavy rain the previous night.<br><br>
         ${continueText}`;
     } else if (example.id === "instruction_2") {
         feedbackText = `<strong style="color: #2e7d32;">Correct!</strong><br><br>
-        This is highly plausible, even if it is not absolutely certain. When someone carefully studies material every day, they will usually remember most of it, even though it's possible they might not (for example, if they were very tired or stressed).<br><br>
+        This effect at the very least likely, even if it is not absolutely certain. When someone carefully studies material every day, they will usually remember most of it, even though it's possible they might not (for example, if they were very tired or stressed).<br><br>
         ${continueText}`;
     } else if (example.id === "instruction_3") {
         feedbackText = `<strong style="color: #2e7d32;">Correct!</strong><br><br>
@@ -498,15 +498,15 @@ function showNegativeInstructionFeedback(example, likelihood, isLikelihoodApprop
         if (example.id === "instruction_1") {
             // First example: Wet sidewalk from rain
             feedbackText += `<strong style="color: #d32f2f;">Incorrect likelihood rating.</strong><br><br>
-            This effect is highly plausible, even if it is not absolutely certain. It is technically possible that the sidewalk dried before the morning (e.g. if it was extremely hot and dry outside), but it is more likely that it was still at least a bit wet. Please move the slider to a higher value (66-99) to continue.`;
+            This effect at the very least likely, even if it is not absolutely certain. It is technically possible that the sidewalk dried before the morning (e.g. if it was extremely hot and dry outside), but it is more likely that it was still at least a bit wet. Please move the slider to a higher value (66-99) to continue.`;
         } else if (example.id === "instruction_2") {
             // Second example: Student remembered material
             feedbackText += `<strong style="color: #d32f2f;">Incorrect likelihood rating.</strong><br><br>
-            This effect is highly plausible, even if it is not absolutely certain. It is possible that the student did not remember most of the material despite all their effort (e.g. if they were very tired), but it is more likely that if they carefully studied the material everyday, they remembered most of the material. Please move the slider to a higher value (66-99) to continue.`;
+            This effect at the very least likely, even if it is not absolutely certain. It is possible that the student did not remember most of the material despite all their effort (e.g. if they were very tired), but it is more likely that if they carefully studied the material everyday, they remembered most of the material. Please move the slider to a higher value (66-99) to continue.`;
         } else {
             // Generic high likelihood case for other examples
             feedbackText += `<strong style="color: #d32f2f;">Incorrect likelihood rating.</strong><br><br>
-            This is actually a highly plausible ${example['asks-for']}. Please move the slider to a higher value (66-99) to continue.`;
+            This ${example['asks-for']} is actually a at the very least likely, even if it is not absolutely certain. Please move the slider to a higher value (66-99) to continue.`;
         }
     } else if (correctLikelihood === 0) {
         if (example.id === "instruction_3") {
