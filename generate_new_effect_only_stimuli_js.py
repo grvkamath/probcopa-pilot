@@ -112,3 +112,57 @@ with open('new_effect_datapoints_split_stimuli.js', 'w') as f:
     
     f.write('];\n')
 
+
+
+# Now, to also create a js file for our final validation random sample of 30 items from ProbCOPA v2:
+probcopa_v2_30_samples_path = "probcopa_v2_30_samples.jsonl"
+probcopa_v2_30_samples = pd.read_json(probcopa_v2_30_samples_path, lines=True)
+
+sublist_size = 30
+
+n_splits = len(probcopa_v2_30_samples) // sublist_size
+print(f"Splitting data into {n_splits} sublists of size {sublist_size}...")
+subsets = []
+for i in range(n_splits):
+    start_idx = i * sublist_size
+    end_idx = start_idx + sublist_size
+    subset = probcopa_v2_30_samples.iloc[start_idx:end_idx]
+    subsets.append(subset)
+
+json_subsets = []
+for subset in subsets:
+    subset_dicts = subset.to_dict('records')
+    json_subsets.append(subset_dicts)
+
+# Write to validation_random_sample_30_items.js file with proper formatting
+print(f"Writing to validation_random_sample_30_items.js...")
+
+with open('validation_random_sample_30_items.js', 'w') as f:
+    f.write('const COPA_DATA = [\n')
+    
+    # Write each subset with proper indentation
+    for i, subset in enumerate(json_subsets):
+        f.write('  [\n')  # Start of subset with 2-space indent
+        
+        # Write each row in the subset
+        for j, row in enumerate(subset):
+            # Convert row to JSON with proper indentation
+            row_json = json.dumps(row, indent=2)
+            # Split into lines and add 2 more spaces to align with subset
+            lines = row_json.split('\n')
+            indented_lines = ['    ' + line for line in lines]
+            indented_row = '\n'.join(indented_lines)
+            
+            if j < len(subset) - 1:
+                f.write(indented_row + ',\n')
+            else:
+                f.write(indented_row + '\n')
+        
+        if i < len(json_subsets) - 1:
+            f.write('  ],\n')  # End of subset with comma
+        else:
+            f.write('  ]\n')   # End of last subset without comma
+    
+    f.write('];\n')
+
+
